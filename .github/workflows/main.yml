@@ -1,0 +1,28 @@
+Name: Test for SSL vulnerabilities against hosts
+run-name: Test for SSL vulnerabilities using ${{ inputs.sourcedata }}
+on:
+  workflow_dispatch:
+    inputs:
+      sourcedata:
+        description: "What is the source variable of data containing the list of hosts to scan?"
+        default: "scansslhosts_csv"
+        required: true
+        type: choice
+        options:
+          - "scansslhosts_csv"
+          - "scansslhosts_multiline"
+          - "scansslhosts_singlehost"
+          - "scansslhosts_singleip"
+  workflow_call:
+    secrets:
+      token: true
+      type: string
+jobs:
+  scan_ssl_hosts:
+    runs-on: ubuntu-latest
+    name: Execute ssl vulnerability scan against hosts
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          submodules: true

@@ -51,7 +51,8 @@ jobs:
           elif [[ ${SOURCEDATA} == "scansslhosts_singlehost" ]]; then
             if [[ ! -z ${SINGLEHOST} ]]; then
               echo "Will scan ${SINGLEHOST} for vulnerabilities"
-              ./testssl.sh -U "${SINGLEHOST}":443
+              ./testssl.sh -U --ip one  "${SINGLEHOST}":443 | tee /tmp/testssl.out
+              cat /tmp/testssl.out | sed 's/\x1b\[[0-9;]*m//g')" >> $GITHUB_STEP_SUMMARY
             else
               echo "Warning, you specified scansslhosts_singlehost but did not specify anything in singlehost parameter" >> $GITHUB_STEP_SUMMARY
               exit 1
@@ -59,7 +60,9 @@ jobs:
           elif [[ ${SOURCEDATA} == "scansslhosts_singleip" ]]; then
             if [[ ! -z ${SINGLEIP} ]]; then
               echo "Will scan ${SINGLEIP} for vulnerabilities"
-              ./testssl.sh -U --ip "${SINGLEIP}" "${SINGLEIP}:443"
+              ./testssl.sh -U --ip "${SINGLEIP}" "${SINGLEIP}:443" > /tmp/testssl.out 2>&1
+              cat /tmp/testssl.out
+              cat /tmp/testssl.out | sed 's/\x1b\[[0-9;]*m//g')" >> $GITHUB_STEP_SUMMARY
             else
               echo "Warning, you specified scansslhosts_singleip but did not specify the IP address in the singleip parameter" >> $GITHUB_STEP_SUMMARY
               exit 1

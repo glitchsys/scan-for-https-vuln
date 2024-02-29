@@ -13,6 +13,14 @@ on:
           - "scansslhosts_multiline"
           - "scansslhosts_singlehost"
           - "scansslhosts_singleip"
+      singlehost:
+        description: "If scansslhosts_singlehost, what single hostname should we scan?"
+        required: false
+        type: string
+      singleip:
+        description: "If scansslhosts_singleip, what IP address should we scan?"
+        required: false
+        type: string
   workflow_call:
     secrets:
       token:
@@ -31,8 +39,29 @@ jobs:
         id: testssl-trial
         env:
           SOURCEDATA: ${{ github.event.inputs.sourcedata }}
-        run:
-          echo "Source data is ${SOURCEDATA}"
+          SINGLEHOST: ${{ github.event.inputs.singlehost }}
+          SINGLEIP: ${{ github.event.inputs.singleip }}
+        run: |
           cd testssl.sh || exit
-          echo "Just as a test, we will scan www.glitchsys.com"
-          ./testssl.sh -U www.glitchsys.com:443
+          echo "Source data is ${SOURCEDATA}"
+          if [[ ${SOURCEDATA} == "scansslhosts_csv" ]]; then
+            echo "Pulling list of hosts from scansslhosts_csv env variable, in csv format"
+          elif [[ ${SOURCEDATA} == "scansslhosts_multiline" ]]; then
+            echo "Pulling list of hosts from scansslhosts_multiline env variable, in multi-line format"
+          elif [[ ${SOURCEDATA} == "scansslhosts_singlehost" ]]; then
+            if [[ ! -z ${SINGLEHOST} ]]; then
+              echo "Will scan ${SINGLEHOST} for vulnerabilities"
+              ./testssl.sh -U "${SINGLEHOST}":443
+            else
+              echo "Warning, you specified scansslhosts_singlehost but did not specify anything in singlehost parameter" >> $GITHUB_STEP_SUMMARY
+              exit 1
+            fi
+          elif [[ ${SOURCEDATA} == "scansslhosts_singleip" ]]; then
+            if [[ ! -z ${SINGLEIP} ]]; then
+              echo "Will scan ${SINGLEIP} for vulnerabilities"
+              ./testssl.sh -U --ip "${SINGLEIP}" "${SINGLEIP}:443"
+            else
+              echo "Warning, you specified scansslhosts_singleip but did not specify the IP address in the singleip parameter" >> $GITHUB_STEP_SUMMARY
+              exit 1
+            fi
+          fi

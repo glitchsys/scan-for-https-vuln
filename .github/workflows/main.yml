@@ -1,4 +1,4 @@
-Name: Test for SSL vulnerabilities against hosts
+name: Test for SSL vulnerabilities against hosts
 run-name: Test for SSL vulnerabilities using ${{ inputs.sourcedata }}
 on:
   workflow_dispatch:
@@ -15,7 +15,8 @@ on:
           - "scansslhosts_singleip"
   workflow_call:
     secrets:
-      token: true
+      token:
+        required: false
       type: string
 jobs:
   scan_ssl_hosts:

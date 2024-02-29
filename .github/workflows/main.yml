@@ -17,7 +17,6 @@ on:
     secrets:
       token:
         required: false
-      type: string
 jobs:
   scan_ssl_hosts:
     runs-on: ubuntu-latest
